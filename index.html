@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Colombia Earthquake Relief - The Ledger</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap');
+
+  :root{
+    --paper: #FAF3DC;
+    --paper-dark: #F0E4C0;
+    --ink: #142B57;
+    --ink-soft: #4A5A7D;
+    --clay: #CE1126;
+    --gold: #E3A712;
+    --green-stamp: #4B6B4E;
+    --line: rgba(20,43,87,0.18);
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  body{
+    background: var(--paper);
+    background-image:
+      repeating-linear-gradient(0deg, rgba(37,50,74,0.025) 0px, rgba(37,50,74,0.025) 1px, transparent 1px, transparent 3px);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap{ max-width: 640px; margin: 0 auto; padding: 0 20px 80px; }
+
+  /* ---------- HEADER ---------- */
+  header{
+    padding: 48px 0 28px;
+    text-align: center;
+    border-bottom: 2px dashed var(--line);
+  }
+  .eyebrow{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--clay);
+    margin-bottom: 14px;
+  }
+  h1{
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: clamp(32px, 6vw, 46px);
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+  }
+  header p.sub{
+    margin-top: 14px;
+    color: var(--ink-soft);
+    font-size: 15.5px;
+    max-width: 46ch;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ---------- TOTALS LEDGER ---------- */
+  .totals{
+    margin: 32px 0;
+    background: var(--paper-dark);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 28px 24px;
+    position: relative;
+  }
+  .totals::before, .totals::after{
+    content:'';
+    position:absolute; left:0; right:0; height:10px;
+    background-image: radial-gradient(circle at 8px 5px, var(--paper) 5px, transparent 5.5px);
+    background-size: 16px 10px;
+    background-repeat: repeat-x;
+  }
+  .totals::before{ top:-5px; }
+  .totals::after{ bottom:-5px; transform: rotate(180deg); }
+
+  .totals-row{
+    display:flex; justify-content:space-between; align-items:baseline;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--line);
+  }
+  .totals-row:last-child{ border-bottom:none; }
+  .totals-label{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+  }
+  .totals-value{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 22px;
+    font-weight: 600;
+  }
+  .totals-value.raised{ color: var(--clay); font-size: 30px; }
+  .totals-updated{
+    text-align:center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin-top: 16px;
+    letter-spacing: 0.04em;
+  }
+
+  .cta-row{ display:flex; gap:10px; margin: 20px 0 36px; flex-wrap: wrap; }
+  .btn{
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size: 14.5px;
+    padding: 13px 20px;
+    border-radius: 3px;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    flex:1;
+    min-width: 160px;
+    border: 1.5px solid var(--ink);
+    cursor:pointer;
+    transition: transform .15s ease, opacity .15s ease;
+  }
+  .btn:hover{ transform: translateY(-1px); }
+  .btn-primary{ background: var(--clay); border-color: var(--clay); color: var(--paper); }
+  .btn-ghost{ background: transparent; color: var(--ink); }
+
+  /* ---------- SECTION HEADS ---------- */
+  .section-head{
+    display:flex; align-items:center; gap:12px;
+    margin: 44px 0 18px;
+  }
+  .section-head .num{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px; color: var(--gold);
+    border:1px solid var(--gold);
+    border-radius:50%;
+    width:22px; height:22px;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .section-head h2{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size: 21px;
+  }
+  .section-note{ color: var(--ink-soft); font-size: 14px; margin-bottom: 18px; }
+
+  /* ---------- PROOF ENTRIES (receipts) ---------- */
+  .entry{
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 18px 18px 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 0 var(--line);
+    position: relative;
+  }
+  .entry-top{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:10px;
+    margin-bottom: 8px;
+  }
+  .entry-date{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11.5px; color: var(--ink-soft);
+    text-transform:uppercase; letter-spacing:.04em;
+  }
+  .stamp{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--green-stamp);
+    border: 1.5px solid var(--green-stamp);
+    border-radius: 3px;
+    padding: 2px 7px;
+    transform: rotate(-3deg);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .entry-caption{ font-size: 14.5px; margin-bottom: 10px; }
+  .entry-amount{
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:600; font-size: 15px; color: var(--clay);
+    margin-bottom: 10px;
+  }
+  .entry-media img, .entry-media video{
+    width:100%; border-radius: 2px; display:block; border: 1px solid var(--line);
+  }
+  .entry-media a.media-link{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size: 13px; color: var(--ink);
+    text-decoration: underline;
+    text-decoration-color: var(--gold);
+  }
+  .empty-state{
+    text-align:center; padding: 30px 16px;
+    color: var(--ink-soft); font-size: 14px;
+    border: 1px dashed var(--line); border-radius: 3px;
+  }
+
+  /* ---------- EMAIL SIGNUP ---------- */
+  .signup{
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 4px;
+    padding: 30px 24px;
+    margin-top: 46px;
+    text-align:center;
+  }
+  .signup h2{
+    font-family:'Fraunces', serif;
+    font-weight: 600;
+    font-size: 22px;
+    margin-bottom: 8px;
+  }
+  .signup p{ color: rgba(239,231,216,0.75); font-size: 14px; margin-bottom: 20px; }
+  .signup-form{ display:flex; gap:8px; flex-wrap:wrap; }
+  .signup-form input[type=email]{
+    flex:1; min-width: 180px;
+    padding: 13px 14px;
+    border-radius: 3px;
+    border: none;
+    font-family:'Inter',sans-serif;
+    font-size: 14.5px;
+  }
+  .signup-form button{
+    background: var(--gold);
+    color: var(--ink);
+    border:none;
+    font-weight:600;
+    font-size:14.5px;
+    padding: 13px 18px;
+    border-radius:3px;
+    cursor:pointer;
+  }
+  .signup-msg{ margin-top: 12px; font-size: 13px; }
+  .signup .fine{ margin-top:14px; font-size:11.5px; color: rgba(239,231,216,0.5); }
+
+  footer{
+    text-align:center;
+    margin-top: 50px;
+    padding-top: 22px;
+    border-top: 2px dashed var(--line);
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .admin-toggle{
+    background:none; border:none; color: var(--ink-soft);
+    font-size:11px; text-decoration:underline; cursor:pointer; margin-top:10px;
+  }
+
+  /* ---------- ADMIN PANEL ---------- */
+  .admin-panel{
+    margin-top: 30px;
+    border: 2px solid var(--clay);
+    border-radius: 4px;
+    padding: 20px;
+    background: #fff;
+    display:none;
+  }
+  .admin-panel.open{ display:block; }
+  .admin-panel h3{ font-family:'Fraunces',serif; font-size:17px; margin-bottom:12px; }
+  .admin-panel label{ display:block; font-size:12px; color:var(--ink-soft); margin: 10px 0 4px; font-family:'IBM Plex Mono',monospace; }
+  .admin-panel input[type=password],
+  .admin-panel input[type=text],
+  .admin-panel input[type=number],
+  .admin-panel input[type=date],
+  .admin-panel textarea,
+  .admin-panel select{
+    width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:3px; font-family:'Inter',sans-serif; font-size:13.5px;
+  }
+  .admin-panel textarea{ resize:vertical; min-height:50px; }
+  .admin-row{ display:flex; gap:10px; }
+  .admin-row > div{ flex:1; }
+  .admin-panel button.save{
+    margin-top:14px; background: var(--ink); color:#fff; border:none; padding:11px 16px;
+    border-radius:3px; font-weight:600; cursor:pointer; font-size:13.5px;
+  }
+  .admin-msg{ font-size:12.5px; margin-top:8px; }
+  .entry-del{
+    background:none; border:none; color:var(--clay); font-size:11px; text-decoration:underline; cursor:pointer; margin-left:auto;
+  }
+
+  /* ---------- FILE UPLOAD ---------- */
+  .file-upload-area{
+    border: 2px dashed var(--line);
+    border-radius: 4px;
+    padding: 18px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .2s;
+    background: #fafafa;
+    position: relative;
+  }
+  .file-upload-area:hover{ border-color: var(--ink); }
+  .file-upload-area input[type=file]{
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .file-upload-label{
+    font-size: 13px; color: var(--ink-soft); pointer-events: none;
+  }
+  .file-upload-label strong{ color: var(--ink); }
+  .media-preview{
+    margin-top: 10px; display: none;
+  }
+  .media-preview img, .media-preview video{
+    max-width: 100%; max-height: 220px; border-radius: 3px; border: 1px solid var(--line);
+  }
+  .or-divider{
+    display: flex; align-items: center; gap: 10px;
+    margin: 14px 0 6px;
+    font-size: 11px; color: var(--ink-soft); font-family: 'IBM Plex Mono', monospace;
+    text-transform: uppercase; letter-spacing: .06em;
+  }
+  .or-divider::before, .or-divider::after{
+    content: ''; flex: 1; height: 1px; background: var(--line);
+  }
+
+  /* ---------- CHANGE PASSWORD ---------- */
+  .change-pass-box{
+    background: #f5f5f5; padding: 14px; border-radius: 3px; margin-bottom: 16px; display: none;
+  }
+  .lockout-notice{
+    background: #fff0f0; border: 1px solid #ffcdd2; border-radius: 3px; padding: 12px;
+    font-size: 13px; color: var(--clay); margin-top: 10px; display: none;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Relief Fund - Open Ledger</div>
+    <h1>Every peso, tracked.</h1>
+    <p class="sub">On August 10, 2026, a 7.4 magnitude earthquake hit western Colombia, with Cali, Pereira, and Chocó hit hardest. This page is the running, honest record of what's been raised and exactly where it went.</p>
+  </header>
+
+  <div class="totals" id="totals-block">
+    <div class="totals-row">
+      <span class="totals-label">Total raised</span>
+      <span class="totals-value raised" id="total-raised">$0</span>
+    </div>
+    <div class="totals-row">
+      <span class="totals-label">Sent / distributed so far</span>
+      <span class="totals-value" id="total-sent">$0</span>
+    </div>
+    <div class="totals-row">
+      <span class="totals-label">Currently in transit</span>
+      <span class="totals-value" id="total-pending">$0</span>
+    </div>
+    <div class="totals-updated" id="last-updated">Last updated: not yet</div>
+  </div>
+
+  <div class="cta-row">
+    <a href="https://www.gofundme.com/f/help-colombia-families-after-the-earthquake" id="gofundme-link" class="btn btn-primary" target="_blank" rel="noopener">Give on GoFundMe</a>
+    <a href="#proof" class="btn btn-ghost">See the proof</a>
+  </div>
+
+  <div class="section-head">
+    <span class="num">&#10003;</span>
+    <h2>Verify it live</h2>
+  </div>
+  <p class="section-note">The total above is updated by hand as donations come in. See the live total and every donor for yourself, straight from GoFundMe.</p>
+  <div class="cta-row" style="margin-top:0;">
+    <a href="https://www.gofundme.com/f/help-colombia-families-after-the-earthquake" class="btn btn-primary" target="_blank" rel="noopener">See the live GoFundMe page</a>
+  </div>
+
+  <div class="section-head" id="proof">
+    <span class="num">1</span>
+    <h2>Where it went</h2>
+  </div>
+  <p class="section-note">Receipts, transfer confirmations, and video of supplies as they're bought and sent, updated as it happens.</p>
+  <div id="entries-list"></div>
+  <div class="empty-state" id="entries-empty" style="display:none;">No entries yet. The first update will appear here.</div>
+
+  <div class="signup">
+    <h2>Get the next update</h2>
+    <p>I'll email you when new funds go out. No spam, just receipts.</p>
+    <form class="signup-form" id="email-form">
+      <input type="email" id="email-input" placeholder="you@email.com" required>
+      <button type="submit">Notify me</button>
+    </form>
+    <div class="signup-msg" id="signup-msg"></div>
+    <div class="fine">Unsubscribe anytime. Your email is only used for relief-fund updates.</div>
+  </div>
+
+  <footer>
+    Started by Daniela Lozano &middot; Cali, Colombia
+    <br>
+    <button class="admin-toggle" id="admin-toggle">update this page</button>
+  </footer>
+
+  <div class="admin-panel" id="admin-panel">
+    <h3>Update ledger (private)</h3>
+
+    <!-- AUTH GATE -->
+    <div id="admin-gate">
+      <!-- First-time setup -->
+      <div id="admin-setup" style="display:none;">
+        <p style="font-size:13px; color:var(--ink-soft); margin-bottom:14px;">No passcode set yet. Create one now — it's stored as a secure hash, not as plain text.</p>
+        <label>Create passcode</label>
+        <input type="password" id="admin-pass-new" placeholder="Choose a strong passcode" autocomplete="new-password">
+        <label>Confirm passcode</label>
+        <input type="password" id="admin-pass-confirm" placeholder="Repeat your passcode" autocomplete="new-password">
+        <button class="save" id="admin-create">Create passcode &amp; unlock</button>
+        <div class="admin-msg" id="admin-create-msg"></div>
+      </div>
+
+      <!-- Regular login -->
+      <div id="admin-login" style="display:none;">
+        <label>Passcode</label>
+        <input type="password" id="admin-pass" placeholder="Enter passcode" autocomplete="current-password">
+        <button class="save" id="admin-unlock">Unlock</button>
+        <div class="admin-msg" id="admin-gate-msg"></div>
+        <div class="lockout-notice" id="lockout-notice"></div>
+      </div>
+    </div>
+
+    <!-- ADMIN BODY (shown after auth) -->
+    <div id="admin-body" style="display:none;">
+
+      <!-- Change password -->
+      <div style="text-align:right; margin-bottom:16px;">
+        <button class="admin-toggle" id="change-pass-toggle">Change passcode</button>
+      </div>
+      <div class="change-pass-box" id="change-pass-box">
+        <label>Current passcode</label>
+        <input type="password" id="cp-current" placeholder="Current passcode">
+        <label>New passcode</label>
+        <input type="password" id="cp-new" placeholder="New passcode (min 6 chars)">
+        <label>Confirm new passcode</label>
+        <input type="password" id="cp-confirm" placeholder="Repeat new passcode">
+        <button class="save" id="do-change-pass">Update passcode</button>
+        <div class="admin-msg" id="change-pass-msg"></div>
+      </div>
+
+      <!-- Totals -->
+      <label>Total raised ($)</label>
+      <input type="number" id="in-raised" placeholder="e.g. 4200">
+      <label>Total sent ($)</label>
+      <input type="number" id="in-sent" placeholder="e.g. 3100">
+      <label>GoFundMe link</label>
+      <input type="text" id="in-link" placeholder="https://gofundme.com/...">
+      <button class="save" id="save-totals">Save totals</button>
+      <div class="admin-msg" id="totals-msg"></div>
+
+      <!-- New entry -->
+      <h3 style="margin-top:26px;">Add a new entry</h3>
+      <div class="admin-row">
+        <div>
+          <label>Date</label>
+          <input type="date" id="in-date">
+        </div>
+        <div>
+          <label>Amount ($, optional)</label>
+          <input type="number" id="in-amount" placeholder="e.g. 500">
+        </div>
+      </div>
+      <label>Caption</label>
+      <textarea id="in-caption" placeholder="What this shows — e.g. 'Water and first aid supplies purchased for Barrio X'"></textarea>
+
+      <label>Upload photo or video</label>
+      <div class="file-upload-area" id="file-upload-area">
+        <input type="file" id="in-media-file" accept="image/*,video/*">
+        <div class="file-upload-label">
+          <strong>Choose a file</strong> or drag and drop<br>
+          <span style="font-size:11px;">Images or videos &middot; Max 20MB recommended</span>
+        </div>
+      </div>
+      <div class="media-preview" id="media-preview"></div>
+
+      <div class="or-divider">or paste a URL instead</div>
+      <input type="text" id="in-media-url" placeholder="https://drive.google.com/... or YouTube link">
+
+      <label style="margin-top:12px;">Media type (if using URL)</label>
+      <select id="in-media-type">
+        <option value="none">No media / not applicable</option>
+        <option value="image">Image (receipt / photo)</option>
+        <option value="video">Video</option>
+      </select>
+
+      <button class="save" id="add-entry">Add entry</button>
+      <div class="admin-msg" id="entry-msg"></div>
+
+      <!-- Manage entries -->
+      <h3 style="margin-top:26px;">Manage entries</h3>
+      <div id="admin-entries-list" style="margin-top:10px;"></div>
+
+      <!-- Email subscribers -->
+      <h3 style="margin-top:26px;">Email subscribers</h3>
+      <div class="admin-msg" id="subscriber-count">Loading…</div>
+      <button class="save" id="show-emails" style="margin-top:10px;">Show all emails</button>
+      <textarea id="emails-output" style="margin-top:10px; min-height:120px; display:none;" readonly></textarea>
+      <button class="save" id="copy-emails" style="display:none; margin-top:8px;">Copy to clipboard</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ══ SUPABASE CONFIG ══════════════════════════════════════════════════════════
+// 1. Go to supabase.com → your project → Settings → API
+// 2. Paste your Project URL and anon/public key below
+const SUPABASE_URL      = 'https://YOUR-PROJECT-ID.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR-ANON-PUBLIC-KEY';
+
+// Supabase-backed storage — replaces the platform window.storage API
+window.storage = {
+  async get(key) {
+    const r = await fetch(
+      `${SUPABASE_URL}/rest/v1/kv_store?key=eq.${encodeURIComponent(key)}&select=value`,
+      { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }
+    );
+    if (!r.ok) throw new Error(`Storage read failed: ${r.status}`);
+    const rows = await r.json();
+    return rows.length ? { value: rows[0].value } : null;
+  },
+
+  async set(key, value) {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/kv_store`, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        Prefer: 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify({ key, value })
+    });
+    if (!r.ok) throw new Error(`Storage write failed: ${r.status}`);
+  },
+
+  async list(prefix) {
+    const r = await fetch(
+      `${SUPABASE_URL}/rest/v1/kv_store?key=like.${encodeURIComponent(prefix + '%')}&select=key&order=key.asc`,
+      { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }
+    );
+    if (!r.ok) throw new Error(`Storage list failed: ${r.status}`);
+    const rows = await r.json();
+    return { keys: rows.map(row => row.key) };
+  },
+
+  async delete(key) {
+    const r = await fetch(
+      `${SUPABASE_URL}/rest/v1/kv_store?key=eq.${encodeURIComponent(key)}`,
+      {
+        method: 'DELETE',
+        headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }
+      }
+    );
+    if (!r.ok) throw new Error(`Storage delete failed: ${r.status}`);
+  }
+};
+
+// ── Storage helpers ──────────────────────────────────────────────────────────
+const totalsKey    = "campaign-totals";
+const entriesPrefix = "entry:";
+const PASS_HASH_KEY = "admin-hash-v2";
+
+function fmtMoney(n){
+  n = Number(n) || 0;
+  return "$" + n.toLocaleString("en-US");
+}
+
+// SHA-256 via Web Crypto (no password ever stored in source code)
+async function hashPassword(str){
+  const enc = new TextEncoder();
+  const buf = await crypto.subtle.digest('SHA-256', enc.encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function getStoredHash(){
+  try{
+    const res = await window.storage.get(PASS_HASH_KEY, true);
+    return res ? res.value : null;
+  }catch(e){ return null; }
+}
+async function setStoredHash(hash){
+  await window.storage.set(PASS_HASH_KEY, hash, true);
+}
+
+// ── Totals ───────────────────────────────────────────────────────────────────
+async function loadTotals(){
+  try{
+    const res = await window.storage.get(totalsKey, true);
+    return res ? JSON.parse(res.value) : { raised: 1133, sent: 0, link: "https://www.gofundme.com/f/help-colombia-families-after-the-earthquake", updated: null };
+  }catch(e){
+    return { raised: 1133, sent: 0, link: "https://www.gofundme.com/f/help-colombia-families-after-the-earthquake", updated: null };
+  }
+}
+async function saveTotals(data){
+  await window.storage.set(totalsKey, JSON.stringify(data), true);
+}
+async function renderTotals(){
+  const t = await loadTotals();
+  document.getElementById('total-raised').textContent = fmtMoney(t.raised);
+  document.getElementById('total-sent').textContent   = fmtMoney(t.sent);
+  document.getElementById('total-pending').textContent = fmtMoney(Math.max((t.raised||0) - (t.sent||0), 0));
+  document.getElementById('last-updated').textContent = t.updated ? ("Last updated " + t.updated) : "Not yet updated";
+  if(t.link && t.link !== "#"){ document.getElementById('gofundme-link').href = t.link; }
+  document.getElementById('in-raised').value = t.raised || '';
+  document.getElementById('in-sent').value   = t.sent   || '';
+  document.getElementById('in-link').value   = (t.link && t.link !== "#") ? t.link : '';
+}
+
+// ── Entries ──────────────────────────────────────────────────────────────────
+async function loadEntries(){
+  try{
+    const listRes = await window.storage.list(entriesPrefix, true);
+    if(!listRes || !listRes.keys || listRes.keys.length === 0) return [];
+    const entries = [];
+    for(const k of listRes.keys){
+      try{
+        const r = await window.storage.get(k, true);
+        if(r) entries.push({ ...JSON.parse(r.value), _key: k });
+      }catch(e){}
+    }
+    entries.sort((a,b) => (b.date||'').localeCompare(a.date||''));
+    return entries;
+  }catch(e){ return []; }
+}
+
+function fmtDate(d){
+  if(!d) return '';
+  const dt = new Date(d + 'T00:00:00');
+  if(isNaN(dt)) return d;
+  return dt.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+
+function entryMediaHtml(e){
+  if(!e.mediaUrl || e.mediaType === 'none') return '';
+  if(e.mediaType === 'video'){
+    // embed data URLs and direct video files; link out for YouTube/IG etc.
+    if(e.mediaUrl.startsWith('data:video') || /\.(mp4|webm|mov)$/i.test(e.mediaUrl)){
+      return `<div class="entry-media"><video controls src="${e.mediaUrl}"></video></div>`;
+    }
+    return `<div class="entry-media"><a class="media-link" href="${e.mediaUrl}" target="_blank" rel="noopener">&#9654; Watch video proof</a></div>`;
+  }
+  return `<div class="entry-media"><img src="${e.mediaUrl}" alt="Proof"></div>`;
+}
+
+async function renderEntries(){
+  const entries = await loadEntries();
+  const list  = document.getElementById('entries-list');
+  const empty = document.getElementById('entries-empty');
+  list.innerHTML = '';
+  if(entries.length === 0){ empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  entries.forEach(e => {
+    const div = document.createElement('div');
+    div.className = 'entry';
+    div.innerHTML = `
+      <div class="entry-top">
+        <span class="entry-date">${fmtDate(e.date)}</span>
+        <span class="stamp">Sent ✓</span>
+      </div>
+      <div class="entry-caption">${e.caption || ''}</div>
+      ${e.amount ? `<div class="entry-amount">${fmtMoney(e.amount)}</div>` : ''}
+      ${entryMediaHtml(e)}
+    `;
+    list.appendChild(div);
+  });
+}
+
+// Admin-facing entry list (with delete buttons)
+async function renderAdminEntries(){
+  const entries = await loadEntries();
+  const list = document.getElementById('admin-entries-list');
+  list.innerHTML = '';
+  if(entries.length === 0){
+    list.innerHTML = '<p style="font-size:13px; color:var(--ink-soft);">No entries yet.</p>';
+    return;
+  }
+  entries.forEach(e => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px dashed var(--line); font-size:13px;';
+    row.innerHTML = `
+      <span style="flex:1;">${fmtDate(e.date)} — ${(e.caption||'').slice(0,50)}${(e.caption||'').length>50?'…':''}</span>
+      <button class="entry-del" data-key="${e._key}">Delete</button>
+    `;
+    list.appendChild(row);
+  });
+
+  list.querySelectorAll('.entry-del').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if(!confirm('Delete this entry? This cannot be undone.')) return;
+      const k = btn.dataset.key;
+      try{
+        // Try delete method first, fall back to setting empty sentinel
+        if(typeof window.storage.delete === 'function'){
+          await window.storage.delete(k, true);
+        } else {
+          await window.storage.set(k, JSON.stringify({ _deleted: true }), true);
+        }
+        renderEntries();
+        renderAdminEntries();
+      }catch(err){
+        alert('Could not delete entry. Try again.');
+      }
+    });
+  });
+}
+
+// ── Email signup ─────────────────────────────────────────────────────────────
+document.getElementById('email-form').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const input = document.getElementById('email-input');
+  const msg   = document.getElementById('signup-msg');
+  const email = input.value.trim();
+  if(!email) return;
+  try{
+    const key = "subscriber:" + Date.now() + "-" + email.replace(/[^a-zA-Z0-9]/g,'').slice(0,8);
+    await window.storage.set(key, JSON.stringify({ email, date: new Date().toISOString() }), true);
+    msg.textContent = "You're on the list. Thank you.";
+    msg.style.color = "#8FBF8F";
+    input.value = '';
+  }catch(e){
+    msg.textContent = "Something went wrong, please try again.";
+    msg.style.color = "#F2909B";
+  }
+});
+
+// ── File upload ──────────────────────────────────────────────────────────────
+let uploadedMediaDataUrl = null;
+let uploadedMediaType    = null;
+
+document.getElementById('in-media-file').addEventListener('change', (ev) => {
+  const file    = ev.target.files[0];
+  const preview = document.getElementById('media-preview');
+  if(!file){ uploadedMediaDataUrl = null; uploadedMediaType = null; preview.style.display='none'; return; }
+
+  const sizeMB = file.size / (1024 * 1024);
+  if(sizeMB > 50){
+    preview.innerHTML = `<span style="color:var(--clay); font-size:12px;">⚠ File is ${sizeMB.toFixed(1)}MB — very large files may fail to store. Consider uploading to Google Drive and pasting the link below instead.</span>`;
+    preview.style.display = 'block';
+    uploadedMediaDataUrl = null;
+    ev.target.value = '';
+    return;
+  }
+
+  preview.innerHTML = `<span style="font-size:12px; color:var(--ink-soft);">Reading file…</span>`;
+  preview.style.display = 'block';
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    uploadedMediaDataUrl = e.target.result;
+    uploadedMediaType    = file.type.startsWith('video') ? 'video' : 'image';
+    document.getElementById('in-media-type').value = uploadedMediaType;
+    // Clear URL field to avoid confusion
+    document.getElementById('in-media-url').value = '';
+
+    if(uploadedMediaType === 'image'){
+      preview.innerHTML = `<img src="${uploadedMediaDataUrl}" alt="Preview">`;
+    } else {
+      preview.innerHTML = `<video src="${uploadedMediaDataUrl}" controls style="max-width:100%;"></video>`;
+    }
+    preview.style.display = 'block';
+  };
+  reader.onerror = () => {
+    preview.innerHTML = `<span style="color:var(--clay); font-size:12px;">Could not read file. Try a different file or paste a URL below.</span>`;
+  };
+  reader.readAsDataURL(file);
+});
+
+// Clear uploaded file when URL is typed
+document.getElementById('in-media-url').addEventListener('input', () => {
+  if(document.getElementById('in-media-url').value.trim()){
+    uploadedMediaDataUrl = null;
+    uploadedMediaType    = null;
+    document.getElementById('in-media-file').value = '';
+    document.getElementById('media-preview').style.display = 'none';
+  }
+});
+
+// ── Admin toggle ─────────────────────────────────────────────────────────────
+document.getElementById('admin-toggle').addEventListener('click', async () => {
+  const panel = document.getElementById('admin-panel');
+  panel.classList.toggle('open');
+  if(!panel.classList.contains('open')) return;
+
+  const storedHash = await getStoredHash();
+  if(!storedHash){
+    document.getElementById('admin-setup').style.display = 'block';
+    document.getElementById('admin-login').style.display  = 'none';
+  } else {
+    document.getElementById('admin-setup').style.display = 'none';
+    document.getElementById('admin-login').style.display  = 'block';
+  }
+});
+
+// ── First-time password setup ────────────────────────────────────────────────
+document.getElementById('admin-create').addEventListener('click', async () => {
+  const pass1 = document.getElementById('admin-pass-new').value;
+  const pass2 = document.getElementById('admin-pass-confirm').value;
+  const msg   = document.getElementById('admin-create-msg');
+  if(!pass1 || pass1.length < 6){
+    msg.textContent = "Passcode must be at least 6 characters.";
+    msg.style.color = "#CE1126"; return;
+  }
+  if(pass1 !== pass2){
+    msg.textContent = "Passcodes don't match.";
+    msg.style.color = "#CE1126"; return;
+  }
+  try{
+    const hash = await hashPassword(pass1);
+    await setStoredHash(hash);
+    unlockAdmin();
+  }catch(e){
+    msg.textContent = "Error creating passcode. Try again.";
+    msg.style.color = "#CE1126";
+  }
+});
+
+// ── Login with lockout ───────────────────────────────────────────────────────
+let failedAttempts  = 0;
+let lockedUntil     = 0;
+
+document.getElementById('admin-unlock').addEventListener('click', async () => {
+  const msg = document.getElementById('admin-gate-msg');
+  const lockNotice = document.getElementById('lockout-notice');
+
+  if(Date.now() < lockedUntil){
+    const secsLeft = Math.ceil((lockedUntil - Date.now()) / 1000);
+    lockNotice.textContent = `Too many failed attempts. Try again in ${secsLeft}s.`;
+    lockNotice.style.display = 'block';
+    return;
+  }
+
+  const val = document.getElementById('admin-pass').value;
+  if(!val){ msg.textContent = "Enter your passcode."; msg.style.color = "#CE1126"; return; }
+
+  try{
+    const inputHash  = await hashPassword(val);
+    const storedHash = await getStoredHash();
+    if(inputHash === storedHash){
+      failedAttempts = 0;
+      lockNotice.style.display = 'none';
+      document.getElementById('admin-pass').value = '';
+      unlockAdmin();
+    } else {
+      failedAttempts++;
+      if(failedAttempts >= 5){
+        lockedUntil = Date.now() + 30000; // 30-second lockout
+        lockNotice.textContent = "Too many failed attempts. Locked for 30 seconds.";
+        lockNotice.style.display = 'block';
+        msg.textContent = '';
+      } else {
+        msg.textContent = `Wrong passcode. (${5 - failedAttempts} attempts left before lockout)`;
+        msg.style.color = "#CE1126";
+      }
+    }
+  }catch(e){
+    msg.textContent = "Error checking passcode. Try again.";
+    msg.style.color = "#CE1126";
+  }
+});
+
+function unlockAdmin(){
+  document.getElementById('admin-gate').style.display  = 'none';
+  document.getElementById('admin-body').style.display  = 'block';
+  refreshSubscriberCount();
+  renderAdminEntries();
+}
+
+// ── Change password ──────────────────────────────────────────────────────────
+document.getElementById('change-pass-toggle').addEventListener('click', () => {
+  const box = document.getElementById('change-pass-box');
+  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+});
+
+document.getElementById('do-change-pass').addEventListener('click', async () => {
+  const current  = document.getElementById('cp-current').value;
+  const newPass  = document.getElementById('cp-new').value;
+  const confirm  = document.getElementById('cp-confirm').value;
+  const msg      = document.getElementById('change-pass-msg');
+
+  if(!current){ msg.textContent = "Enter your current passcode."; msg.style.color="#CE1126"; return; }
+  if(!newPass || newPass.length < 6){ msg.textContent = "New passcode must be at least 6 characters."; msg.style.color="#CE1126"; return; }
+  if(newPass !== confirm){ msg.textContent = "New passcodes don't match."; msg.style.color="#CE1126"; return; }
+
+  try{
+    const currentHash = await hashPassword(current);
+    const storedHash  = await getStoredHash();
+    if(currentHash !== storedHash){ msg.textContent = "Current passcode is wrong."; msg.style.color="#CE1126"; return; }
+    const newHash = await hashPassword(newPass);
+    await setStoredHash(newHash);
+    msg.textContent = "Passcode updated.";
+    msg.style.color = "#4B6B4E";
+    document.getElementById('cp-current').value = '';
+    document.getElementById('cp-new').value     = '';
+    document.getElementById('cp-confirm').value = '';
+  }catch(e){
+    msg.textContent = "Error updating passcode. Try again.";
+    msg.style.color = "#CE1126";
+  }
+});
+
+// ── Save totals ──────────────────────────────────────────────────────────────
+document.getElementById('save-totals').addEventListener('click', async () => {
+  const raised = document.getElementById('in-raised').value;
+  const sent   = document.getElementById('in-sent').value;
+  const link   = document.getElementById('in-link').value;
+  const msg    = document.getElementById('totals-msg');
+  try{
+    await saveTotals({
+      raised:  Number(raised) || 0,
+      sent:    Number(sent)   || 0,
+      link:    link || '#',
+      updated: new Date().toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' })
+    });
+    msg.textContent = "Saved.";
+    msg.style.color = "#4B6B4E";
+    renderTotals();
+  }catch(e){
+    msg.textContent = "Save failed, try again.";
+    msg.style.color = "#CE1126";
+  }
+});
+
+// ── Add entry ────────────────────────────────────────────────────────────────
+document.getElementById('add-entry').addEventListener('click', async () => {
+  const date      = document.getElementById('in-date').value;
+  const amount    = document.getElementById('in-amount').value;
+  const caption   = document.getElementById('in-caption').value.trim();
+  const mediaType = uploadedMediaDataUrl ? uploadedMediaType : document.getElementById('in-media-type').value;
+  const mediaUrl  = uploadedMediaDataUrl || document.getElementById('in-media-url').value.trim();
+  const msg       = document.getElementById('entry-msg');
+
+  if(!caption){ msg.textContent = "Add a caption first."; msg.style.color = "#CE1126"; return; }
+
+  msg.textContent = "Saving…";
+  msg.style.color = "var(--ink-soft)";
+
+  try{
+    const key = entriesPrefix + Date.now();
+    await window.storage.set(key, JSON.stringify({
+      date:      date || new Date().toISOString().slice(0,10),
+      amount:    amount ? Number(amount) : null,
+      caption,
+      mediaType: mediaType || 'none',
+      mediaUrl:  mediaUrl || ''
+    }), true);
+
+    msg.textContent = "Entry added.";
+    msg.style.color = "#4B6B4E";
+
+    // Reset form
+    document.getElementById('in-caption').value    = '';
+    document.getElementById('in-media-url').value  = '';
+    document.getElementById('in-media-file').value = '';
+    document.getElementById('in-amount').value     = '';
+    document.getElementById('media-preview').style.display = 'none';
+    uploadedMediaDataUrl = null;
+    uploadedMediaType    = null;
+
+    renderEntries();
+    renderAdminEntries();
+  }catch(e){
+    msg.textContent = "Couldn't add entry, try again.";
+    msg.style.color = "#CE1126";
+  }
+});
+
+// ── Email subscribers ────────────────────────────────────────────────────────
+async function refreshSubscriberCount(){
+  try{
+    const res   = await window.storage.list("subscriber:", true);
+    const count = res && res.keys ? res.keys.length : 0;
+    document.getElementById('subscriber-count').textContent = count + " subscriber" + (count === 1 ? '' : 's') + " so far.";
+  }catch(e){
+    document.getElementById('subscriber-count').textContent = "Couldn't load count.";
+  }
+}
+
+document.getElementById('show-emails').addEventListener('click', async () => {
+  const out     = document.getElementById('emails-output');
+  const copyBtn = document.getElementById('copy-emails');
+  out.style.display    = 'block';
+  copyBtn.style.display = 'inline-block';
+  out.value = 'Loading…';
+  try{
+    const res = await window.storage.list("subscriber:", true);
+    if(!res || !res.keys || res.keys.length === 0){ out.value = 'No subscribers yet.'; return; }
+    const rows = [];
+    for(const k of res.keys){
+      try{
+        const r = await window.storage.get(k, true);
+        if(r){
+          const d = JSON.parse(r.value);
+          rows.push(d.email + (d.date ? '  (' + new Date(d.date).toLocaleDateString('en-US') + ')' : ''));
+        }
+      }catch(e){}
+    }
+    out.value = rows.join('\n');
+  }catch(e){
+    out.value = 'Could not load subscribers, try again.';
+  }
+});
+
+document.getElementById('copy-emails').addEventListener('click', () => {
+  const out = document.getElementById('emails-output');
+  out.select();
+  document.execCommand('copy');
+  const btn = document.getElementById('copy-emails');
+  const orig = btn.textContent;
+  btn.textContent = 'Copied!';
+  setTimeout(() => { btn.textContent = orig; }, 1500);
+});
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+renderTotals();
+renderEntries();
+</script>
+</body>
+</html>
