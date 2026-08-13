@@ -192,6 +192,16 @@
   .entry-media img, .entry-media video{
     width:100%; border-radius: 2px; display:block; border: 1px solid var(--line);
   }
+  .entry-media-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .entry-media-grid img, .entry-media-grid video{
+    width:100%; height:140px; object-fit:cover;
+    border-radius:2px; border:1px solid var(--line); display:block;
+  }
   .entry-media a.media-link{
     display:inline-flex; align-items:center; gap:6px;
     font-size: 13px; color: var(--ink);
@@ -467,10 +477,10 @@
 
       <label>Upload photo or video</label>
       <div class="file-upload-area" id="file-upload-area">
-        <input type="file" id="in-media-file" accept="image/*,video/*">
+        <input type="file" id="in-media-file" accept="image/*,video/*" multiple>
         <div class="file-upload-label">
-          <strong>Choose a file</strong> or drag and drop<br>
-          <span style="font-size:11px;">Images or videos &middot; Max 20MB recommended</span>
+          <strong>Choose files</strong> or drag and drop<br>
+          <span style="font-size:11px;">Multiple images or videos &middot; 50MB max per file</span>
         </div>
       </div>
       <div class="media-preview" id="media-preview"></div>
@@ -633,16 +643,28 @@ function fmtDate(d){
   return dt.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
 }
 
-function entryMediaHtml(e){
-  if(!e.mediaUrl || e.mediaType === 'none') return '';
-  if(e.mediaType === 'video'){
-    // embed data URLs and direct video files; link out for YouTube/IG etc.
-    if(e.mediaUrl.startsWith('data:video') || /\.(mp4|webm|mov)$/i.test(e.mediaUrl)){
-      return `<div class="entry-media"><video controls src="${e.mediaUrl}"></video></div>`;
+function singleMediaHtml(url, type){
+  if(type === 'video'){
+    if(url.startsWith('data:video') || /\.(mp4|webm|mov)$/i.test(url)){
+      return `<video controls src="${url}"></video>`;
     }
-    return `<div class="entry-media"><a class="media-link" href="${e.mediaUrl}" target="_blank" rel="noopener">&#9654; Watch video proof</a></div>`;
+    return `<a class="media-link" href="${url}" target="_blank" rel="noopener">&#9654; Watch video proof</a>`;
   }
-  return `<div class="entry-media"><img src="${e.mediaUrl}" alt="Proof"></div>`;
+  return `<img src="${url}" alt="Proof">`;
+}
+
+function entryMediaHtml(e){
+  // New format: array of media items
+  if(e.mediaItems && e.mediaItems.length > 0){
+    if(e.mediaItems.length === 1){
+      return `<div class="entry-media">${singleMediaHtml(e.mediaItems[0].url, e.mediaItems[0].type)}</div>`;
+    }
+    const grid = e.mediaItems.map(m => `<div>${singleMediaHtml(m.url, m.type)}</div>`).join('');
+    return `<div class="entry-media-grid">${grid}</div>`;
+  }
+  // Legacy format: single mediaUrl
+  if(!e.mediaUrl || e.mediaType === 'none') return '';
+  return `<div class="entry-media">${singleMediaHtml(e.mediaUrl, e.mediaType)}</div>`;
 }
 
 async function renderEntries(){
@@ -726,53 +748,75 @@ document.getElementById('email-form').addEventListener('submit', async (ev) => {
   }
 });
 
-// ── File upload ──────────────────────────────────────────────────────────────
-let uploadedMediaDataUrl = null;
-let uploadedMediaType    = null;
+// ── File upload (multi-file) ─────────────────────────────────────────────────
+let uploadedMediaFiles = []; // [{dataUrl, mediaType}]
 
-document.getElementById('in-media-file').addEventListener('change', (ev) => {
-  const file    = ev.target.files[0];
+function readFileAsDataUrl(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = e => resolve({ dataUrl: e.target.result, mediaType: file.type.startsWith('video') ? 'video' : 'image' });
+    reader.onerror = () => reject(new Error('Read failed'));
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderUploadPreviews(){
   const preview = document.getElementById('media-preview');
-  if(!file){ uploadedMediaDataUrl = null; uploadedMediaType = null; preview.style.display='none'; return; }
+  if(!uploadedMediaFiles.length){ preview.style.display='none'; return; }
 
-  const sizeMB = file.size / (1024 * 1024);
-  if(sizeMB > 50){
-    preview.innerHTML = `<span style="color:var(--clay); font-size:12px;">⚠ File is ${sizeMB.toFixed(1)}MB — very large files may fail to store. Consider uploading to Google Drive and pasting the link below instead.</span>`;
+  const thumbs = uploadedMediaFiles.map((f, i) => {
+    const thumb = f.mediaType === 'image'
+      ? `<img src="${f.dataUrl}" style="width:100%;height:90px;object-fit:cover;border-radius:3px;border:1px solid var(--line);">`
+      : `<video src="${f.dataUrl}" style="width:100%;height:90px;object-fit:cover;border-radius:3px;border:1px solid var(--line);"></video>`;
+    return `<div style="position:relative;">
+      ${thumb}
+      <button type="button" onclick="removeUpload(${i})" style="position:absolute;top:3px;right:3px;background:rgba(0,0,0,0.65);border:none;color:#fff;border-radius:50%;width:20px;height:20px;font-size:12px;line-height:1;cursor:pointer;">&#x2715;</button>
+    </div>`;
+  }).join('');
+
+  preview.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;">${thumbs}</div>
+    <div style="font-size:12px;color:var(--ink-soft);margin-top:6px;">${uploadedMediaFiles.length} file${uploadedMediaFiles.length>1?'s':''} selected</div>`;
+  preview.style.display = 'block';
+}
+
+window.removeUpload = function(index){
+  uploadedMediaFiles.splice(index, 1);
+  renderUploadPreviews();
+};
+
+document.getElementById('in-media-file').addEventListener('change', async (ev) => {
+  const files   = Array.from(ev.target.files);
+  const preview = document.getElementById('media-preview');
+  if(!files.length){ uploadedMediaFiles = []; preview.style.display='none'; return; }
+
+  // Warn about oversized individual files
+  const tooBig  = files.filter(f => f.size > 50 * 1024 * 1024);
+  const readable = files.filter(f => f.size <= 50 * 1024 * 1024);
+
+  if(tooBig.length){
+    preview.innerHTML = `<span style="color:var(--clay);font-size:12px;">⚠ ${tooBig.map(f=>f.name).join(', ')} skipped — over 50MB. Upload to Google Drive and paste the link instead.</span>`;
     preview.style.display = 'block';
-    uploadedMediaDataUrl = null;
-    ev.target.value = '';
-    return;
   }
 
-  preview.innerHTML = `<span style="font-size:12px; color:var(--ink-soft);">Reading file…</span>`;
+  if(!readable.length){ ev.target.value=''; return; }
+
+  preview.innerHTML = `<span style="font-size:12px;color:var(--ink-soft);">Reading ${readable.length} file${readable.length>1?'s':''}…</span>`;
   preview.style.display = 'block';
 
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    uploadedMediaDataUrl = e.target.result;
-    uploadedMediaType    = file.type.startsWith('video') ? 'video' : 'image';
-    document.getElementById('in-media-type').value = uploadedMediaType;
-    // Clear URL field to avoid confusion
+  try{
+    const results = await Promise.all(readable.map(readFileAsDataUrl));
+    uploadedMediaFiles = results;
     document.getElementById('in-media-url').value = '';
-
-    if(uploadedMediaType === 'image'){
-      preview.innerHTML = `<img src="${uploadedMediaDataUrl}" alt="Preview">`;
-    } else {
-      preview.innerHTML = `<video src="${uploadedMediaDataUrl}" controls style="max-width:100%;"></video>`;
-    }
-    preview.style.display = 'block';
-  };
-  reader.onerror = () => {
-    preview.innerHTML = `<span style="color:var(--clay); font-size:12px;">Could not read file. Try a different file or paste a URL below.</span>`;
-  };
-  reader.readAsDataURL(file);
+    renderUploadPreviews();
+  }catch(err){
+    preview.innerHTML = `<span style="color:var(--clay);font-size:12px;">Could not read one or more files. Try again.</span>`;
+  }
 });
 
-// Clear uploaded file when URL is typed
+// Clear uploaded files when URL is typed
 document.getElementById('in-media-url').addEventListener('input', () => {
   if(document.getElementById('in-media-url').value.trim()){
-    uploadedMediaDataUrl = null;
-    uploadedMediaType    = null;
+    uploadedMediaFiles = [];
     document.getElementById('in-media-file').value = '';
     document.getElementById('media-preview').style.display = 'none';
   }
@@ -928,9 +972,17 @@ document.getElementById('add-entry').addEventListener('click', async () => {
   const date      = document.getElementById('in-date').value;
   const amount    = document.getElementById('in-amount').value;
   const caption   = document.getElementById('in-caption').value.trim();
-  const mediaType = uploadedMediaDataUrl ? uploadedMediaType : document.getElementById('in-media-type').value;
-  const mediaUrl  = uploadedMediaDataUrl || document.getElementById('in-media-url').value.trim();
-  const msg       = document.getElementById('entry-msg');
+  const msg = document.getElementById('entry-msg');
+
+  // Build media items array
+  let mediaItems = [];
+  if(uploadedMediaFiles.length){
+    mediaItems = uploadedMediaFiles.map(f => ({ url: f.dataUrl, type: f.mediaType }));
+  } else {
+    const urlVal  = document.getElementById('in-media-url').value.trim();
+    const typeVal = document.getElementById('in-media-type').value;
+    if(urlVal && typeVal !== 'none') mediaItems = [{ url: urlVal, type: typeVal }];
+  }
 
   if(!caption){ msg.textContent = "Add a caption first."; msg.style.color = "#CE1126"; return; }
 
@@ -940,11 +992,13 @@ document.getElementById('add-entry').addEventListener('click', async () => {
   try{
     const key = entriesPrefix + Date.now();
     await window.storage.set(key, JSON.stringify({
-      date:      date || new Date().toISOString().slice(0,10),
-      amount:    amount ? Number(amount) : null,
+      date:       date || new Date().toISOString().slice(0,10),
+      amount:     amount ? Number(amount) : null,
       caption,
-      mediaType: mediaType || 'none',
-      mediaUrl:  mediaUrl || ''
+      mediaItems,
+      // keep legacy fields so old entries still display
+      mediaType:  mediaItems.length ? mediaItems[0].type : 'none',
+      mediaUrl:   mediaItems.length ? mediaItems[0].url  : ''
     }), true);
 
     msg.textContent = "Entry added.";
@@ -956,8 +1010,7 @@ document.getElementById('add-entry').addEventListener('click', async () => {
     document.getElementById('in-media-file').value = '';
     document.getElementById('in-amount').value     = '';
     document.getElementById('media-preview').style.display = 'none';
-    uploadedMediaDataUrl = null;
-    uploadedMediaType    = null;
+    uploadedMediaFiles = [];
 
     renderEntries();
     renderAdminEntries();
